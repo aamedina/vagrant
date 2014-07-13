@@ -4,7 +4,7 @@ A Leiningen template for a Clojure and/or ClojureScript project with a Vagrant d
 
 # Usage
 
-lein new vagrant application-name
+`lein new vagrant application-name`
 
 ./Vagrantfile contains the default Vagrant configuration. This is pretty vanilla, but connects it to the local .puppet directory which contains the default puppet script. It also assumes you have your modules installed in your host's home .puppet directory.
 
