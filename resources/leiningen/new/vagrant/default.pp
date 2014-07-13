@@ -22,10 +22,21 @@ package { ['build-essential',
            'bash-completion', 
            'libffi-dev',
            'libreadline-dev',
-           'unzip']:
+           'unzip',
+           'git-core',
+           'python-software-properties']:
   require => Exec['apt-upgrade'],  
   ensure => 'installed',  
 }
+
+apt::ppa { 'ppa:chris-lea/node.js': }
+
+package { ['nodejs']:
+  require => Exec['apt-update'],
+  ensure => 'installed'
+}
+
+Apt::Ppa['ppa:chris-lea/node.js'] -> Package['nodejs']
 
 include java
 include nginx
