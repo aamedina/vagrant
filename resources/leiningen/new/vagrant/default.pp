@@ -1,28 +1,10 @@
-class { 'apt':
-  always_apt_update    => true,
-  disable_keys         => undef,
-  proxy_host           => false,
-  proxy_port           => '8080',
-  purge_sources_list   => true,
-  purge_sources_list_d => true,
-  purge_preferences_d  => true,
-  update_timeout       => undef,
-  fancy_progress       => true
-}
+include apt
 
-apt::source { 'precise':
-  location => 'http://us-east-1.ec2.archive.ubuntu.com/ubuntu/',
-  repos => 'main restricted universe multiverse'
-}
-
-apt::source { 'precise-updates':
-  location => 'http://us-east-1.ec2.archive.ubuntu.com/ubuntu/',
-  repos => 'main restricted universe multiverse'
-}
-
-apt::source { 'precise-security':
-  location => 'http://us-east-1.ec2.archive.ubuntu.com/ubuntu/',
-  repos => 'main restricted universe multiverse'
+apt::source { 'puppetlabs':
+  location   => 'http://apt.puppetlabs.com',
+  repos      => 'main',
+  key        => '4BD6EC30',
+  key_server => 'pgp.mit.edu',
 }
 
 exec { "apt-update":
@@ -39,7 +21,8 @@ exec { "apt-upgrade":
 package { ['build-essential', 
            'bash-completion', 
            'libffi-dev',
-           'libreadline-dev']:  
+           'libreadline-dev',
+           'unzip']:
   require => Exec['apt-upgrade'],  
   ensure => 'installed',  
 }
@@ -55,21 +38,26 @@ exec { 'install-leiningen':
 }
 
 file { '/usr/local/bin/lein':
-  mode => 0755,
+  mode => 755,
   require => Exec["install-leiningen"],
 }
 
 exec { 'init-lein':
-  command => 'bash lein',
-  path => "/usr/local/bin:/usr/bin:/bin",
+  command => '/usr/local/bin/lein',
   creates => '/home/vagrant/.lein',
   require => Exec["install-leiningen"]
+}
+
+file { '/home/vagrant/.lein':
+  ensure => "directory",
+  require => Exec["init-lein"]
 }
 
 exec { 'init-profiles':
   command => 'echo "{:user {:plugins [[cider/cider-nrepl \"0.7.0-SNAPSHOT\"]]}}" > /home/vagrant/.lein/profiles.clj',
   path => "/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/sbin",
-  creates => '/home/vagrant/.lein/profiles.clj'
+  creates => '/home/vagrant/.lein/profiles.clj',
+  require => File['/home/vagrant/.lein']
 }
 
 file { '/home/vagrant/.lein/profiles.clj':
@@ -80,27 +68,28 @@ exec { 'install-grench':
 	command => 'wget https://grenchman.s3.amazonaws.com/downloads/grench-0.2.0-ubuntu -O /usr/local/bin/grench',
   path => "/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/sbin",
   creates => '/usr/local/bin/grench',
-  require => Exec['init-lein'],
+  require => File['/home/vagrant/.lein/profiles.clj'],
 }
 
 file { '/usr/local/bin/grench': 
-  mode => 0755,
+  mode => 755,
   require => Exec['install-grench']
 }
 
 exec { 'init-repl-port':
   command => 'echo "4040" > /home/vagrant/.lein/repl-port',
   path => "/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/sbin",
-  creates => '/home/vagrant/.lein/repl-port'
+  creates => '/home/vagrant/.lein/repl-port',
+  require => File['/usr/local/bin/grench'],
 }
 
 file { '/home/vagrant/.lein/repl-port':
   require => Exec["init-repl-port"]
 }
 
-exec { 'start-nrepl':
-  command => 'nohup lein repl :headless :host "0.0.0.0" :port 4040 > /dev/null 2>&1 &',
-  path => "/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/sbin",
-  require => Exec['install-grench'],
-}
+# exec { 'start-nrepl':
+#   command => 'nohup lein repl :headless :host "0.0.0.0" :port 4040 > /dev/null 2>&1 &',
+#   path => "/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/sbin",
+#   require => Exec['install-grench'],
+# }
 

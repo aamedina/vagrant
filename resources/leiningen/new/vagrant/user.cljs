@@ -1,4 +1,4 @@
 (ns cljs.user
   (:require [weasel.repl :as repl]))
 
-(repl/connect "ws://localhost:9001")
+(repl/connect "ws://192.168.33.10:9001")

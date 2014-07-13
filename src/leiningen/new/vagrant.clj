@@ -35,7 +35,6 @@
              
              ["Vagrantfile" (render "Vagrantfile" data)]
              [".puppet/manifests/default.pp" (render "default.pp" data)]
-             ".puppet/modules"
 
              ["resources/setup.sh" (render "setup.sh" data)]
              
