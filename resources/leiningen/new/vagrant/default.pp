@@ -24,7 +24,9 @@ package { ['build-essential',
            'libreadline-dev',
            'unzip',
            'git-core',
-           'python-software-properties']:
+           'python-software-properties',
+           'libssl-dev',
+           'cmake']:
   require => Exec['apt-upgrade'],  
   ensure => 'installed',  
 }
