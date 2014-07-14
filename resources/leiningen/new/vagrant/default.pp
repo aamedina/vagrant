@@ -19,12 +19,21 @@ exec { "apt-upgrade":
 }
 
 package { ['build-essential', 
+           'python-software-properties',
+           'curl',
+           'git-core',
+           'm4',
+           'ruby',
+           'texinfo',
+           'libbz2-dev',
+           'libcurl4-openssl-dev',
+           'libexpat-dev',
+           'libncurses-dev',
+           'zlib1g-dev',
            'bash-completion', 
            'libffi-dev',
            'libreadline-dev',
            'unzip',
-           'git-core',
-           'python-software-properties',
            'libssl-dev',
            'cmake']:
   require => Exec['apt-upgrade'],  
